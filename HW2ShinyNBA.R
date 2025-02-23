@@ -3,7 +3,7 @@ library(ggplot2)
 library(dplyr)
 library(plotly)
 
-nba_data <- read.csv("https://github.com/Shahv03/nba-shiny-app/blob/main/nba_2022-23_all_stats_with_salary.csv")
+nba_data <- read.csv("https://raw.githubusercontent.com/Shahv03/nba-shiny-app/main/nba_2022-23_all_stats_with_salary.csv")
 
 options(scipen = 999)
 
@@ -71,9 +71,9 @@ server <- function(input, output) {
       theme_minimal() +
       theme(axis.text.y = element_text(angle = 45, hjust = 1))
     
-    ggplotly(p, tooltip = "text") %>% layout(showlegend = TRUE)
+    ggplotly(p, tooltip = "text")
   })
 }
 
 # Run App
-shinyApp(ui = ui, server = server)
+shinyApp(ui, server)
