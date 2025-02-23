@@ -3,7 +3,7 @@ library(ggplot2)
 library(dplyr)
 library(plotly)
 
-nba_data <- read.csv("/Users/shahv03/Documents/College/STAT436/HWS/HW2/nba_2022-23_all_stats_with_salary.csv")
+nba_data <- read.csv("https://github.com/Shahv03/nba-shiny-app/blob/main/nba_2022-23_all_stats_with_salary.csv")
 
 options(scipen = 999)
 
