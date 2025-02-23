@@ -2,7 +2,9 @@ library(shiny)
 library(ggplot2)
 library(dplyr)
 library(plotly)
+library(purrr)
 
+# Load Data
 nba_data <- read.csv("https://raw.githubusercontent.com/Shahv03/nba-shiny-app/main/nba_2022-23_all_stats_with_salary.csv")
 
 options(scipen = 999)
@@ -36,9 +38,10 @@ positions <- unique(unlist(nba_data$PositionList))
 # UI
 ui <- fluidPage(
   titlePanel("NBA Performance vs Salary (2022-2023 Season)"),
+  
   sidebarLayout(
     sidebarPanel(
-      helpText("Select a performance stat to compare against player salaries."),
+      uiOutput("instructions"), 
       selectInput("stat", "Choose Performance Stat:", choices = names(stat_choices)),
       sliderInput("games", "Filter by Games Played:",
                   min = min(nba_data$GP, na.rm = TRUE),
@@ -46,22 +49,35 @@ ui <- fluidPage(
                   value = range(nba_data$GP, na.rm = TRUE), step = 1),
       checkboxGroupInput("positions", "Select Positions:", choices = positions, selected = positions)
     ),
+    
     mainPanel(
       plotlyOutput("salaryPlot"),
-      helpText("Created by Vaibhav Shah")
+      uiOutput("footer")  
     )
   )
 )
+
 # Server
 server <- function(input, output) {
+  
+  output$instructions <- renderUI({
+    HTML("<p>Select a performance stat to compare against player salaries.</p>")
+  })
+
+  output$footer <- renderUI({
+    HTML("<p style='text-align:center; font-size:14px;'>Created by Vaibhav Shah</p>")
+  })
+  
+  # Filtered data
   filtered_data <- reactive({
     nba_data %>%
       filter(GP >= input$games[1] & GP <= input$games[2]) %>%
-      filter(sapply(PositionList, function(pos) any(pos %in% input$positions)))
+      filter(map_lgl(PositionList, ~ any(.x %in% input$positions)))  # Cleaner than sapply()
   })
   
+  # graph
   output$salaryPlot <- renderPlotly({
-    actual_stat <- stat_choices[[input$stat]] 
+    actual_stat <- stat_choices[[input$stat]]
     
     p <- ggplot(filtered_data(), aes(x = .data[[actual_stat]], y = Salary, color = Position, text = Player.Name)) +
       geom_point(alpha = 0.6) +
